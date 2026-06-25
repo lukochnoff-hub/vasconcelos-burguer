@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useCarrinho } from "../context/CarrinhoContext";
 import { fazendas, pixConfig } from "../data/config";
-import { registrarPedido, registrarFidelidade } from "../data/api";
+import { registrarPedido, consultarFidelidade } from "../data/api";
 
 function FinalizarPedido({ onVoltar }) {
   const { itens, total, limparCarrinho } = useCarrinho();
@@ -36,7 +36,7 @@ function FinalizarPedido({ onVoltar }) {
       return;
     }
 
-    const fidelidade = await registrarFidelidade(telefone);
+    const fidelidade = await consultarFidelidade(telefone);
     await registrarPedido({
       nome, telefone, itens, tipoEntrega,
       fazenda: fazendaSelecionada, endereco,

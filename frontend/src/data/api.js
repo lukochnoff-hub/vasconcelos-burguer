@@ -25,9 +25,7 @@ export async function atualizarProduto(id, produto) {
 }
 
 export async function deletarProduto(id) {
-  const res = await fetch(`${BASE_URL}/produtos/${id}`, {
-    method: "DELETE",
-  });
+  const res = await fetch(`${BASE_URL}/produtos/${id}`, { method: "DELETE" });
   return res.json();
 }
 
@@ -54,11 +52,32 @@ export async function deletarCategoria(nome) {
 }
 
 // Pedidos
+export async function listarPedidos() {
+  const res = await fetch(`${BASE_URL}/pedidos`);
+  return res.json();
+}
+
 export async function registrarPedido(pedido) {
   const res = await fetch(`${BASE_URL}/pedidos`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(pedido),
+  });
+  return res.json();
+}
+
+export async function atualizarStatusPedido(id, status) {
+  const res = await fetch(`${BASE_URL}/pedidos/${id}/status`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status }),
+  });
+  return res.json();
+}
+
+export async function confirmarFidelidade(id) {
+  const res = await fetch(`${BASE_URL}/pedidos/${id}/confirmar-fidelidade`, {
+    method: "POST",
   });
   return res.json();
 }
@@ -73,5 +92,21 @@ export async function registrarFidelidade(telefone) {
 
 export async function consultarFidelidade(telefone) {
   const res = await fetch(`${BASE_URL}/fidelidade/${telefone}`);
+  return res.json();
+}
+
+// Funcionamento
+export async function consultarFuncionamento() {
+  const res = await fetch(`${BASE_URL}/funcionamento`);
+  return res.json();
+}
+
+export async function abrirLoja() {
+  const res = await fetch(`${BASE_URL}/funcionamento/abrir`, { method: "POST" });
+  return res.json();
+}
+
+export async function fecharLoja() {
+  const res = await fetch(`${BASE_URL}/funcionamento/fechar`, { method: "POST" });
   return res.json();
 }
