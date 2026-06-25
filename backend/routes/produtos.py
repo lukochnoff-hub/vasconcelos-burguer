@@ -4,7 +4,10 @@ import os
 
 produtos_bp = Blueprint("produtos", __name__)
 
-ARQUIVO = os.path.join(os.path.dirname(__file__), "../dados_produtos.json")
+ARQUIVO_PRODUTOS = os.path.join(os.path.dirname(__file__), "../dados_produtos.json")
+ARQUIVO_CATEGORIAS = os.path.join(os.path.dirname(__file__), "../dados_categorias.json")
+
+CATEGORIAS_INICIAIS = ["Hambúrgueres", "Pastéis", "Bebidas", "Porções", "Snacks"]
 
 PRODUTOS_INICIAIS = [
     {"id": 1, "categoria": "Hambúrgueres", "nome": "X-Burguer", "preco": 14, "descricao": "Hambúrguer artesanal", "disponivel": True},
@@ -24,44 +27,84 @@ PRODUTOS_INICIAIS = [
     {"id": 15, "categoria": "Pastéis", "nome": "Pastel Unidade", "preco": 22, "descricao": "Pastel unidade", "disponivel": True},
 ]
 
-def carregar_dados():
-    if not os.path.exists(ARQUIVO):
-        salvar_dados(PRODUTOS_INICIAIS)
+def carregar_produtos():
+    if not os.path.exists(ARQUIVO_PRODUTOS):
+        salvar_produtos(PRODUTOS_INICIAIS)
         return PRODUTOS_INICIAIS
-    with open(ARQUIVO, "r") as f:
+    with open(ARQUIVO_PRODUTOS, "r") as f:
         return json.load(f)
 
-def salvar_dados(dados):
-    with open(ARQUIVO, "w") as f:
+def salvar_produtos(dados):
+    with open(ARQUIVO_PRODUTOS, "w") as f:
         json.dump(dados, f, indent=2, ensure_ascii=False)
 
+def carregar_categorias():
+    if not os.path.exists(ARQUIVO_CATEGORIAS):
+        salvar_categorias(CATEGORIAS_INICIAIS)
+        return CATEGORIAS_INICIAIS
+    with open(ARQUIVO_CATEGORIAS, "r") as f:
+        return json.load(f)
+
+def salvar_categorias(dados):
+    with open(ARQUIVO_CATEGORIAS, "w") as f:
+        json.dump(dados, f, indent=2, ensure_ascii=False)
+
+# Rotas de categorias
+@produtos_bp.route("/categorias", methods=["GET"])
+def listar_categorias():
+    return jsonify(carregar_categorias())
+
+@produtos_bp.route("/categorias", methods=["POST"])
+def adicionar_categoria():
+    dados = carregar_categorias()
+    nova = request.get_json().get("nome")
+    if not nova or nova in dados:
+        return jsonify({"erro": "Categoria inválida ou já existe"}), 400
+    dados.append(nova)
+    salvar_categorias(dados)
+    return jsonify(dados), 201
+
+@produtos_bp.route("/categorias/<nome>", methods=["DELETE"])
+def deletar_categoria(nome):
+    categorias = carregar_categorias()
+    if nome not in categorias:
+        return jsonify({"erro": "Categoria não encontrada"}), 404
+    categorias = [c for c in categorias if c != nome]
+    salvar_categorias(categorias)
+    # Remove produtos da categoria deletada
+    produtos = carregar_produtos()
+    produtos = [p for p in produtos if p["categoria"] != nome]
+    salvar_produtos(produtos)
+    return jsonify({"ok": True})
+
+# Rotas de produtos
 @produtos_bp.route("/produtos", methods=["GET"])
 def listar():
-    return jsonify(carregar_dados())
+    return jsonify(carregar_produtos())
 
 @produtos_bp.route("/produtos", methods=["POST"])
 def adicionar():
-    dados = carregar_dados()
+    dados = carregar_produtos()
     novo = request.get_json()
     novo["id"] = max([p["id"] for p in dados], default=0) + 1
     novo["disponivel"] = True
     dados.append(novo)
-    salvar_dados(dados)
+    salvar_produtos(dados)
     return jsonify(novo), 201
 
 @produtos_bp.route("/produtos/<int:id>", methods=["PUT"])
 def atualizar(id):
-    dados = carregar_dados()
+    dados = carregar_produtos()
     for i, p in enumerate(dados):
         if p["id"] == id:
             dados[i].update(request.get_json())
-            salvar_dados(dados)
+            salvar_produtos(dados)
             return jsonify(dados[i])
     return jsonify({"erro": "Produto não encontrado"}), 404
 
 @produtos_bp.route("/produtos/<int:id>", methods=["DELETE"])
 def deletar(id):
-    dados = carregar_dados()
+    dados = carregar_produtos()
     dados = [p for p in dados if p["id"] != id]
-    salvar_dados(dados)
+    salvar_produtos(dados)
     return jsonify({"ok": True})

@@ -3,9 +3,15 @@ import { CarrinhoProvider } from "./context/CarrinhoContext";
 import Cardapio from "./pages/Cardapio";
 import FinalizarPedido from "./pages/FinalizarPedido";
 import Carrinho from "./components/Carrinho";
+import Admin from "./pages/Admin";
 
 function App() {
   const [pagina, setPagina] = useState("cardapio");
+
+  // Acessa /admin pela URL
+  const isAdmin = window.location.pathname === "/admin";
+
+  if (isAdmin) return <Admin />;
 
   return (
     <CarrinhoProvider>
