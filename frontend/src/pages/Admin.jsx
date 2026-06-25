@@ -2,13 +2,13 @@ import { useState } from "react";
 import AdminLogin from "../components/AdminLogin";
 import AdminPainel from "../components/AdminPainel";
 
-function Admin() {
+function Admin({ onSair }) {
   const [logado, setLogado] = useState(false);
 
   return logado ? (
-    <AdminPainel onSair={() => setLogado(false)} />
+    <AdminPainel onSair={onSair} />
   ) : (
-    <AdminLogin onLogin={() => setLogado(true)} />
+    <AdminLogin onLogin={() => setLogado(true)} onSair={onSair} />
   );
 }
 

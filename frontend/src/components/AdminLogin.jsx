@@ -2,7 +2,7 @@ import { useState } from "react";
 
 const SENHA = "vasconcelos2024";
 
-function AdminLogin({ onLogin }) {
+function AdminLogin({ onLogin, onSair }) {
   const [senha, setSenha] = useState("");
   const [erro, setErro] = useState(false);
 
@@ -39,6 +39,12 @@ function AdminLogin({ onLogin }) {
           className="w-full bg-yellow-400 text-black font-bold py-3 rounded-xl hover:bg-yellow-300 transition"
         >
           Entrar
+        </button>
+        <button
+          onClick={onSair}
+          className="text-zinc-500 hover:text-white text-sm text-center transition"
+        >
+          ← Voltar ao cardápio
         </button>
       </div>
     </div>
