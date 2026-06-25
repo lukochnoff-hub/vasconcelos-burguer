@@ -4,7 +4,7 @@ import Cardapio from "./pages/Cardapio";
 import FinalizarPedido from "./pages/FinalizarPedido";
 import Carrinho from "./components/Carrinho";
 import Admin from "./pages/Admin";
-import logo from "./assets/logo.png";
+import logo from "./assets/logo_lanche.png";
 
 function App() {
   const [pagina, setPagina] = useState("cardapio");
