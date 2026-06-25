@@ -46,7 +46,7 @@ function Cardapio() {
   const hora = agora.getHours();
   const horarioDia = HORARIOS[diaSemana];
   const dentroDoHorario = hora >= horarioDia.abre && hora < horarioDia.fecha;
-  const lojaAberta = funcionamento.aberto || dentroDoHorario;
+  const lojaAberta = funcionamento.manual ? funcionamento.aberto : dentroDoHorario;
 
   if (carregando) return (
     <div className="flex items-center justify-center py-20">

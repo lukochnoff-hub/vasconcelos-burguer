@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify
 import json
 import os
+from datetime import datetime
 
 funcionamento_bp = Blueprint("funcionamento", __name__)
 
@@ -8,7 +9,7 @@ ARQUIVO = os.path.join(os.path.dirname(__file__), "../dados_funcionamento.json")
 
 def carregar():
     if not os.path.exists(ARQUIVO):
-        return {"aberto": False}
+        return {"aberto": False, "manual": False}
     with open(ARQUIVO, "r") as f:
         return json.load(f)
 
@@ -22,10 +23,10 @@ def status():
 
 @funcionamento_bp.route("/funcionamento/abrir", methods=["POST"])
 def abrir():
-    salvar({"aberto": True})
-    return jsonify({"aberto": True})
+    salvar({"aberto": True, "manual": True})
+    return jsonify({"aberto": True, "manual": True})
 
 @funcionamento_bp.route("/funcionamento/fechar", methods=["POST"])
 def fechar():
-    salvar({"aberto": False})
-    return jsonify({"aberto": False})
+    salvar({"aberto": False, "manual": True})
+    return jsonify({"aberto": False, "manual": True})

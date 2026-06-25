@@ -36,8 +36,13 @@ function FinalizarPedido({ onVoltar }) {
       return;
     }
 
+    const pedidoRegistrado = await registrarPedido({
+      nome, telefone, itens, tipoEntrega,
+      fazenda: fazendaSelecionada, endereco,
+      pagamento, taxaEntrega, total: totalComEntrega,
+    });
+    
     const fidelidade = await consultarFidelidade(telefone);
-    await registrarPedido({
       nome, telefone, itens, tipoEntrega,
       fazenda: fazendaSelecionada, endereco,
       pagamento, taxaEntrega, total: totalComEntrega,
