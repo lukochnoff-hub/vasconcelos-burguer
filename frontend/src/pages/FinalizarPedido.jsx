@@ -35,39 +35,35 @@ function FinalizarPedido({ onVoltar }) {
       alert(`Pedido mínimo para ${fazendaSelecionada} é R$ ${pedidoMinimo},00`);
       return;
     }
-
-    const pedidoRegistrado = await registrarPedido({
+  
+    await registrarPedido({
       nome, telefone, itens, tipoEntrega,
       fazenda: fazendaSelecionada, endereco,
       pagamento, taxaEntrega, total: totalComEntrega,
     });
-    
+  
     const fidelidade = await consultarFidelidade(telefone);
-      nome, telefone, itens, tipoEntrega,
-      fazenda: fazendaSelecionada, endereco,
-      pagamento, taxaEntrega, total: totalComEntrega,
-    });
-
+  
     const fidelidadeTxt = fidelidade.ganhou
       ? `%F0%9F%8E%89 *PARABÉNS! Você ganhou um lanche grátis!*%0AEscolha um: X-Burguer, X-Salada, X-Eguee, X-Salsicha, X-Calabresa, X-Bacon, X-Frango, Pastelão ou Pastel Unidade`
       : `%E2%AD%90 Fidelidade: ${fidelidade.pedidos}/9 — faltam ${fidelidade.faltam} pedido(s) para ganhar um lanche grátis!`;
-
+  
     const itensTxt = itens
       .map((i) => `• ${i.quantidade}x ${i.nome} — R$ ${(i.preco * i.quantidade).toFixed(2).replace(".", ",")}`)
       .join("%0A");
-
+  
     const entregaTxt =
       tipoEntrega === "retirada"
         ? `Retirada no local`
         : tipoEntrega === "vila"
         ? `Entrega na vila — ${endereco}`
         : `Entrega em fazenda: ${fazendaSelecionada} — ${endereco}%0ATaxa de entrega: R$ ${taxaEntrega.toFixed(2).replace(".", ",")}`;
-
+  
     const pagamentoTxt =
       pagamento === "pix"
         ? `Pagamento: Pix (${pixConfig.chave})`
         : `Pagamento: Cartão na retirada`;
-
+  
     const mensagem =
       `*Novo Pedido — Vasconcelos Burguer*%0A%0A` +
       `*Cliente:* ${nome}%0A` +
@@ -76,7 +72,7 @@ function FinalizarPedido({ onVoltar }) {
       `${entregaTxt}%0A${pagamentoTxt}%0A%0A` +
       `*Total: R$ ${totalComEntrega.toFixed(2).replace(".", ",")}*%0A%0A` +
       `${fidelidadeTxt}`;
-
+  
     limparCarrinho();
     onVoltar();
     window.location.href = `https://wa.me/55${pixConfig.chave}?text=${mensagem}`;
