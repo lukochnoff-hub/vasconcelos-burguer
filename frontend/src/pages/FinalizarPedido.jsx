@@ -15,7 +15,6 @@ function FinalizarPedido({ onVoltar }) {
   const fazenda = fazendas.find((f) => f.nome === fazendaSelecionada);
   const taxaEntrega = tipoEntrega === "fazenda" && fazenda ? fazenda.taxa : 0;
   const totalComEntrega = total + taxaEntrega;
-
   const pedidoMinimo = fazenda?.pedidoMinimo || 0;
   const abaixoDoMinimo = tipoEntrega === "fazenda" && fazenda && total < pedidoMinimo;
 
@@ -36,56 +35,17 @@ function FinalizarPedido({ onVoltar }) {
       alert(`Pedido mínimo para ${fazendaSelecionada} é R$ ${pedidoMinimo},00`);
       return;
     }
-  
-    // Registra no backend
+
     const fidelidade = await registrarFidelidade(telefone);
     await registrarPedido({
       nome, telefone, itens, tipoEntrega,
       fazenda: fazendaSelecionada, endereco,
       pagamento, taxaEntrega, total: totalComEntrega,
     });
-  
-    // Monta mensagem
-    const fidelidadeTxt = fidelidade.ganhou
-      ? `🎉 *PARABÉNS! Você ganhou um lanche grátis!*\nEscolha um: X-Burguer, X-Salada, X-Eguee, X-Salsicha, X-Calabresa, X-Bacon, X-Frango, Pastelão ou Pastel Unidade 🍔`
-      : `⭐ Fidelidade: ${fidelidade.pedidos}/9 — faltam ${fidelidade.faltam} pedido(s) para ganhar um lanche grátis!`;
-  
-    const itensTxt = itens
-      .map((i) => `• ${i.quantidade}x ${i.nome} — R$ ${(i.preco * i.quantidade).toFixed(2).replace(".", ",")}`)
-      .join("%0A");
-  
-    const entregaTxt =
-      tipoEntrega === "retirada"
-        ? `🏠 Retirada no local`
-        : tipoEntrega === "vila"
-        ? `🏘️ Entrega na vila — ${endereco}`
-        : `🛵 Entrega em fazenda: ${fazendaSelecionada} — ${endereco}%0ATaxa de entrega: R$ ${taxaEntrega.toFixed(2).replace(".", ",")}`;
-  
-    const pagamentoTxt =
-      pagamento === "pix"
-        ? `💳 Pagamento: Pix (${pixConfig.chave})`
-        : `💳 Pagamento: Cartão na retirada`;
-  
-    const mensagem =
-      `🍔 *Novo Pedido — Vasconcelos Burguer*%0A%0A` +
-      `👤 *Cliente:* ${nome}%0A` +
-      `📱 *Telefone:* ${telefone}%0A%0A` +
-      `*Itens do pedido:*%0A${itensTxt}%0A%0A` +
-      `${entregaTxt}%0A${pagamentoTxt}%0A%0A` +
-      `💰 *Total: R$ ${totalComEntrega.toFixed(2).replace(".", ",")}*%0A%0A` +
-      `${fidelidadeTxt}`;
-  
-    const url = `https://wa.me/55${pixConfig.chave}?text=${mensagem}`;
-  
-    limparCarrinho();
-    onVoltar();
-    window.location.href = url;
-  }
 
-    // Monta mensagem fidelidade
     const fidelidadeTxt = fidelidade.ganhou
-      ? `🎉 *PARABÉNS! Você ganhou um lanche grátis!*\nEscolha um: X-Burguer, X-Salada, X-Eguee, X-Salsicha, X-Calabresa, X-Bacon, X-Frango, Pastelão ou Pastel Unidade 🍔`
-      : `⭐ Fidelidade: ${fidelidade.pedidos}/9 — faltam ${fidelidade.faltam} pedido(s) para ganhar um lanche grátis!`;
+      ? `%F0%9F%8E%89 *PARABÉNS! Você ganhou um lanche grátis!*%0AEscolha um: X-Burguer, X-Salada, X-Eguee, X-Salsicha, X-Calabresa, X-Bacon, X-Frango, Pastelão ou Pastel Unidade`
+      : `%E2%AD%90 Fidelidade: ${fidelidade.pedidos}/9 — faltam ${fidelidade.faltam} pedido(s) para ganhar um lanche grátis!`;
 
     const itensTxt = itens
       .map((i) => `• ${i.quantidade}x ${i.nome} — R$ ${(i.preco * i.quantidade).toFixed(2).replace(".", ",")}`)
@@ -93,28 +53,28 @@ function FinalizarPedido({ onVoltar }) {
 
     const entregaTxt =
       tipoEntrega === "retirada"
-        ? `🏠 Retirada no local`
+        ? `Retirada no local`
         : tipoEntrega === "vila"
-        ? `🏘️ Entrega na vila — ${endereco}`
-        : `🛵 Entrega em fazenda: ${fazendaSelecionada} — ${endereco}%0ATaxa de entrega: R$ ${taxaEntrega.toFixed(2).replace(".", ",")}`;
+        ? `Entrega na vila — ${endereco}`
+        : `Entrega em fazenda: ${fazendaSelecionada} — ${endereco}%0ATaxa de entrega: R$ ${taxaEntrega.toFixed(2).replace(".", ",")}`;
 
     const pagamentoTxt =
       pagamento === "pix"
-        ? `💳 Pagamento: Pix (${pixConfig.chave})`
-        : `💳 Pagamento: Cartão na retirada`;
+        ? `Pagamento: Pix (${pixConfig.chave})`
+        : `Pagamento: Cartão na retirada`;
 
     const mensagem =
-      `🍔 *Novo Pedido — Vasconcelos Burguer*%0A%0A` +
-      `👤 *Cliente:* ${nome}%0A` +
-      `📱 *Telefone:* ${telefone}%0A%0A` +
+      `*Novo Pedido — Vasconcelos Burguer*%0A%0A` +
+      `*Cliente:* ${nome}%0A` +
+      `*Telefone:* ${telefone}%0A%0A` +
       `*Itens do pedido:*%0A${itensTxt}%0A%0A` +
       `${entregaTxt}%0A${pagamentoTxt}%0A%0A` +
-      `💰 *Total: R$ ${totalComEntrega.toFixed(2).replace(".", ",")}*%0A%0A` +
+      `*Total: R$ ${totalComEntrega.toFixed(2).replace(".", ",")}*%0A%0A` +
       `${fidelidadeTxt}`;
 
-    window.open(`https://wa.me/55${pixConfig.chave}?text=${mensagem}`, "_blank");
     limparCarrinho();
     onVoltar();
+    window.location.href = `https://wa.me/55${pixConfig.chave}?text=${mensagem}`;
   }
 
   return (
@@ -128,7 +88,6 @@ function FinalizarPedido({ onVoltar }) {
 
       <h2 className="text-yellow-400 text-2xl font-bold mb-6">Finalizar Pedido</h2>
 
-      {/* Resumo */}
       <div className="bg-zinc-900 border border-zinc-700 rounded-xl p-4 mb-6">
         <h3 className="text-white font-bold mb-3">Resumo do pedido</h3>
         {itens.map((item) => (
@@ -149,7 +108,6 @@ function FinalizarPedido({ onVoltar }) {
         </div>
       </div>
 
-      {/* Formulário */}
       <div className="flex flex-col gap-4">
         <input
           type="text"
@@ -166,103 +124,79 @@ function FinalizarPedido({ onVoltar }) {
           className="bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-yellow-400"
         />
 
-        {/* Tipo de entrega */}
         <div className="flex gap-3">
-        <button
+          <button
             onClick={() => { setTipoEntrega("retirada"); setFazendaSelecionada(""); }}
-            className={`flex-1 py-3 rounded-xl font-bold transition ${
-            tipoEntrega === "retirada"
-                ? "bg-yellow-400 text-black"
-                : "bg-zinc-800 text-white hover:bg-zinc-700"
-            }`}
-        >
+            className={`flex-1 py-3 rounded-xl font-bold transition ${tipoEntrega === "retirada" ? "bg-yellow-400 text-black" : "bg-zinc-800 text-white hover:bg-zinc-700"}`}
+          >
             🏠 Retirada
-        </button>
-        <button
+          </button>
+          <button
             onClick={() => { setTipoEntrega("vila"); setFazendaSelecionada(""); }}
-            className={`flex-1 py-3 rounded-xl font-bold transition ${
-            tipoEntrega === "vila"
-                ? "bg-yellow-400 text-black"
-                : "bg-zinc-800 text-white hover:bg-zinc-700"
-            }`}
-        >
+            className={`flex-1 py-3 rounded-xl font-bold transition ${tipoEntrega === "vila" ? "bg-yellow-400 text-black" : "bg-zinc-800 text-white hover:bg-zinc-700"}`}
+          >
             🏘️ Vila
-        </button>
-        <button
+          </button>
+          <button
             onClick={() => { setTipoEntrega("fazenda"); setFazendaSelecionada(""); }}
-            className={`flex-1 py-3 rounded-xl font-bold transition ${
-            tipoEntrega === "fazenda"
-                ? "bg-yellow-400 text-black"
-                : "bg-zinc-800 text-white hover:bg-zinc-700"
-            }`}
-        >
+            className={`flex-1 py-3 rounded-xl font-bold transition ${tipoEntrega === "fazenda" ? "bg-yellow-400 text-black" : "bg-zinc-800 text-white hover:bg-zinc-700"}`}
+          >
             🛵 Fazenda
-        </button>
+          </button>
         </div>
 
-        {/* Campos de entrega vila */}
         {tipoEntrega === "vila" && (
-        <input
+          <input
             type="text"
             placeholder="Endereço completo"
             value={endereco}
             onChange={(e) => setEndereco(e.target.value)}
             className="bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-yellow-400"
-        />
+          />
         )}
 
-        {/* Campos de entrega fazenda */}
         {tipoEntrega === "fazenda" && (
-        <>
+          <>
             <select
-            value={fazendaSelecionada}
-            onChange={(e) => setFazendaSelecionada(e.target.value)}
-            className="bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-yellow-400"
+              value={fazendaSelecionada}
+              onChange={(e) => setFazendaSelecionada(e.target.value)}
+              className="bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-yellow-400"
             >
-            <option value="">Selecione a fazenda</option>
-            {fazendas.map((f) => (
+              <option value="">Selecione a fazenda</option>
+              {fazendas.map((f) => (
                 <option key={f.nome} value={f.nome}>
-                {f.nome} — Taxa: R$ {f.taxa.toFixed(2).replace(".", ",")}
-                {f.pedidoMinimo > 0 ? ` (mín. R$ ${f.pedidoMinimo})` : ""}
+                  {f.nome} — Taxa: R$ {f.taxa.toFixed(2).replace(".", ",")}
+                  {f.pedidoMinimo > 0 ? ` (mín. R$ ${f.pedidoMinimo})` : ""}
                 </option>
-            ))}
+              ))}
             </select>
 
             {abaixoDoMinimo && (
-            <p className="text-red-400 text-sm">
+              <p className="text-red-400 text-sm">
                 ⚠️ Pedido mínimo para {fazendaSelecionada} é R$ {pedidoMinimo},00
-            </p>
+              </p>
             )}
 
             <input
-            type="text"
-            placeholder="Endereço completo"
-            value={endereco}
-            onChange={(e) => setEndereco(e.target.value)}
-            className="bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-yellow-400"
+              type="text"
+              placeholder="Endereço completo"
+              value={endereco}
+              onChange={(e) => setEndereco(e.target.value)}
+              className="bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-yellow-400"
             />
-        </>
+          </>
         )}
 
-        {/* Pagamento */}
         <div className="flex gap-3">
           <button
             onClick={() => setPagamento("pix")}
-            className={`flex-1 py-3 rounded-xl font-bold transition ${
-              pagamento === "pix"
-                ? "bg-yellow-400 text-black"
-                : "bg-zinc-800 text-white hover:bg-zinc-700"
-            }`}
+            className={`flex-1 py-3 rounded-xl font-bold transition ${pagamento === "pix" ? "bg-yellow-400 text-black" : "bg-zinc-800 text-white hover:bg-zinc-700"}`}
           >
             💸 Pix
           </button>
           <button
             onClick={() => setPagamento("cartao")}
-            className={`flex-1 py-3 rounded-xl font-bold transition ${
-              pagamento === "cartao"
-                ? "bg-yellow-400 text-black"
-                : "bg-zinc-800 text-white hover:bg-zinc-700"
-            }`}
+            className={`flex-1 py-3 rounded-xl font-bold transition ${pagamento === "cartao" ? "bg-yellow-400 text-black" : "bg-zinc-800 text-white hover:bg-zinc-700"}`}
           >
             💳 Cartão
           </button>
