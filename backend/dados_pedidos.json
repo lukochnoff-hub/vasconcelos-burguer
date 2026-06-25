@@ -1,0 +1,35 @@
+[
+  {
+    "nome": "malu",
+    "telefone": "111111111111111",
+    "itens": [
+      {
+        "id": 4,
+        "categoria": "Hambúrgueres",
+        "nome": "X-Eguee",
+        "preco": 19,
+        "descricao": "Hambúrguer artesanal",
+        "disponivel": true,
+        "quantidade": 1
+      },
+      {
+        "id": 2,
+        "categoria": "Hambúrgueres",
+        "nome": "X-Salada",
+        "preco": 17,
+        "descricao": "Hambúrguer artesanal com salada",
+        "disponivel": true,
+        "quantidade": 1
+      }
+    ],
+    "tipoEntrega": "retirada",
+    "fazenda": "",
+    "endereco": "",
+    "pagamento": "pix",
+    "taxaEntrega": 0,
+    "total": 36,
+    "id": 1,
+    "data": "25/06/2026 16:03",
+    "status": "pendente"
+  }
+]
