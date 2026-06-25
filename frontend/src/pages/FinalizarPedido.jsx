@@ -36,20 +36,51 @@ function FinalizarPedido({ onVoltar }) {
       alert(`Pedido mínimo para ${fazendaSelecionada} é R$ ${pedidoMinimo},00`);
       return;
     }
-
-    // Registra pedido e fidelidade no backend
+  
+    // Registra no backend
     const fidelidade = await registrarFidelidade(telefone);
     await registrarPedido({
-      nome,
-      telefone,
-      itens,
-      tipoEntrega,
-      fazenda: fazendaSelecionada,
-      endereco,
-      pagamento,
-      taxaEntrega,
-      total: totalComEntrega,
+      nome, telefone, itens, tipoEntrega,
+      fazenda: fazendaSelecionada, endereco,
+      pagamento, taxaEntrega, total: totalComEntrega,
     });
+  
+    // Monta mensagem
+    const fidelidadeTxt = fidelidade.ganhou
+      ? `🎉 *PARABÉNS! Você ganhou um lanche grátis!*\nEscolha um: X-Burguer, X-Salada, X-Eguee, X-Salsicha, X-Calabresa, X-Bacon, X-Frango, Pastelão ou Pastel Unidade 🍔`
+      : `⭐ Fidelidade: ${fidelidade.pedidos}/9 — faltam ${fidelidade.faltam} pedido(s) para ganhar um lanche grátis!`;
+  
+    const itensTxt = itens
+      .map((i) => `• ${i.quantidade}x ${i.nome} — R$ ${(i.preco * i.quantidade).toFixed(2).replace(".", ",")}`)
+      .join("%0A");
+  
+    const entregaTxt =
+      tipoEntrega === "retirada"
+        ? `🏠 Retirada no local`
+        : tipoEntrega === "vila"
+        ? `🏘️ Entrega na vila — ${endereco}`
+        : `🛵 Entrega em fazenda: ${fazendaSelecionada} — ${endereco}%0ATaxa de entrega: R$ ${taxaEntrega.toFixed(2).replace(".", ",")}`;
+  
+    const pagamentoTxt =
+      pagamento === "pix"
+        ? `💳 Pagamento: Pix (${pixConfig.chave})`
+        : `💳 Pagamento: Cartão na retirada`;
+  
+    const mensagem =
+      `🍔 *Novo Pedido — Vasconcelos Burguer*%0A%0A` +
+      `👤 *Cliente:* ${nome}%0A` +
+      `📱 *Telefone:* ${telefone}%0A%0A` +
+      `*Itens do pedido:*%0A${itensTxt}%0A%0A` +
+      `${entregaTxt}%0A${pagamentoTxt}%0A%0A` +
+      `💰 *Total: R$ ${totalComEntrega.toFixed(2).replace(".", ",")}*%0A%0A` +
+      `${fidelidadeTxt}`;
+  
+    const url = `https://wa.me/55${pixConfig.chave}?text=${mensagem}`;
+  
+    limparCarrinho();
+    onVoltar();
+    window.location.href = url;
+  }
 
     // Monta mensagem fidelidade
     const fidelidadeTxt = fidelidade.ganhou
