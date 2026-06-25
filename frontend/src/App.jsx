@@ -36,7 +36,7 @@ function App() {
             className="h-16 w-16 rounded-full object-cover mr-3"
           />
           <h1 className="text-yellow-400 text-2xl font-bold tracking-wide">
-            Vasconcelos Burguer 🍔
+            Vasconcelos Burguer 
           </h1>
         </header>
         <main>
