@@ -53,7 +53,7 @@ function FinalizarPedido({ onVoltar }) {
 
     // Monta mensagem fidelidade
     const fidelidadeTxt = fidelidade.ganhou
-      ? `🎉 *PARABÉNS! Você ganhou um lanche grátis de até R$25!*`
+      ? `🎉 *PARABÉNS! Você ganhou um lanche grátis!*\nEscolha um: X-Burguer, X-Salada, X-Eguee, X-Salsicha, X-Calabresa, X-Bacon, X-Frango, Pastelão ou Pastel Unidade 🍔`
       : `⭐ Fidelidade: ${fidelidade.pedidos}/9 — faltam ${fidelidade.faltam} pedido(s) para ganhar um lanche grátis!`;
 
     const itensTxt = itens
