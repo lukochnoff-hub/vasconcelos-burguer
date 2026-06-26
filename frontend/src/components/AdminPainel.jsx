@@ -222,11 +222,11 @@ function AdminPainel({ onSair }) {
       {/* Abas */}
       <div className="flex border-b border-zinc-800">
         {[
-          { id: "pedidos", label: "📋 Pedidos" },
-          { id: "produtos", label: "🍔 Produtos" },
-          { id: "categorias", label: "📂 Categorias" },
-          { id: "fidelidade", label: "⭐ Fidelidade" },
-          { id: "adicionais", label: "➕ Adicionais" },
+          { id: "pedidos", label: "Pedidos" },
+          { id: "produtos", label: "Produtos" },
+          { id: "categorias", label: "Categorias" },
+          { id: "fidelidade", label: "Fidelidade" },
+          { id: "adicionais", label: "Adicionais" },
         ].map((a) => (
           <button
             key={a.id}

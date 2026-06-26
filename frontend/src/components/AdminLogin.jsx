@@ -18,7 +18,7 @@ function AdminLogin({ onLogin, onSair }) {
     <div className="min-h-screen bg-black flex items-center justify-center px-4">
       <div className="bg-zinc-900 border border-zinc-700 rounded-2xl p-8 w-full max-w-sm flex flex-col gap-5">
         <h2 className="text-yellow-400 text-2xl font-bold text-center">
-          🔐 Admin
+          Admin
         </h2>
         <p className="text-zinc-400 text-sm text-center">
           Área restrita — Vasconcelos Burguer
