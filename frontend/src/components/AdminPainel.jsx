@@ -254,42 +254,44 @@ function AdminPainel({ onSair }) {
       <div className="max-w-2xl mx-auto px-4 py-6">
 
         {/* ABA PEDIDOS */}
-        <div className="flex gap-2">
-          {["dia", "semana", "mes"].map((p) => (
-            <button
-              key={p}
-              onClick={() => setFiltroPeriodo(p)}
-              className={`flex-1 py-2 rounded-xl font-bold text-sm transition ${
-                filtroPeriodo === p
-                  ? "bg-yellow-400 text-black"
-                  : "bg-zinc-800 text-white hover:bg-zinc-700"
-              }`}
-            >
-              {p === "dia" ? "Hoje" : p === "semana" ? "Semana" : "Mês"}
-            </button>
-          ))}
-          <button
-            onClick={() => setFiltroPeriodo("mesSelecionado")}
-            className={`flex-1 py-2 rounded-xl font-bold text-sm transition ${
-              filtroPeriodo === "mesSelecionado"
-                ? "bg-yellow-400 text-black"
-                : "bg-zinc-800 text-white hover:bg-zinc-700"
-            }`}
-          >
-            📅
-          </button>
-        </div>
+        {aba === "pedidos" && (
+          <div className="flex flex-col gap-4">
+            <div className="flex gap-2">
+              {["dia", "semana", "mes"].map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setFiltroPeriodo(p)}
+                  className={`flex-1 py-2 rounded-xl font-bold text-sm transition ${
+                    filtroPeriodo === p
+                      ? "bg-yellow-400 text-black"
+                      : "bg-zinc-800 text-white hover:bg-zinc-700"
+                  }`}
+                >
+                  {p === "dia" ? "Hoje" : p === "semana" ? "Semana" : "Mês"}
+                </button>
+              ))}
+              <button
+                onClick={() => setFiltroPeriodo("mesSelecionado")}
+                className={`flex-1 py-2 rounded-xl font-bold text-sm transition ${
+                  filtroPeriodo === "mesSelecionado"
+                    ? "bg-yellow-400 text-black"
+                    : "bg-zinc-800 text-white hover:bg-zinc-700"
+                }`}
+              >
+                &#128197;
+              </button>
+            </div>
 
-        {filtroPeriodo === "mesSelecionado" && (
-          <input
-            type="month"
-            onChange={(e) => {
-              const [ano, mes] = e.target.value.split("-");
-              setFiltroMesSelecionado(`${mes}/${ano}`);
-            }}
-            className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-yellow-400"
-          />
-        )}
+            {filtroPeriodo === "mesSelecionado" && (
+              <input
+                type="month"
+                onChange={(e) => {
+                  const [ano, mes] = e.target.value.split("-");
+                  setFiltroMesSelecionado(`${mes}/${ano}`);
+                }}
+                className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-yellow-400"
+              />
+            )}
 
             <div className="bg-zinc-900 border border-zinc-700 rounded-xl p-4 flex justify-between items-center">
               <div>
@@ -313,7 +315,7 @@ function AdminPainel({ onSair }) {
                     <div>
                       <p className="font-bold text-white">#{pedido.id} — {pedido.nome}</p>
                       <p className="text-zinc-400 text-sm">{pedido.data}</p>
-                      <p className="text-zinc-400 text-sm">📱 {pedido.telefone}</p>
+                      <p className="text-zinc-400 text-sm">&#128241; {pedido.telefone}</p>
                     </div>
                     <span className={`text-xs px-3 py-1 rounded-full font-bold ${STATUS_COR[pedido.status]}`}>
                       {pedido.status}
@@ -330,9 +332,9 @@ function AdminPainel({ onSair }) {
                   </div>
 
                   <div className="text-sm text-zinc-400 border-t border-zinc-800 pt-2">
-                    <p>📍 {pedido.tipoEntrega === "retirada" ? "Retirada" : pedido.tipoEntrega === "vila" ? `Vila — ${pedido.endereco}` : `Fazenda: ${pedido.fazenda} — ${pedido.endereco}`}</p>
-                    <p>💳 {pedido.pagamento === "pix" ? "Pix" : "Cartão"}</p>
-                    {pedido.taxaEntrega > 0 && <p>🛵 Taxa: R$ {pedido.taxaEntrega?.toFixed(2).replace(".", ",")}</p>}
+                    <p>&#128205; {pedido.tipoEntrega === "retirada" ? "Retirada" : pedido.tipoEntrega === "vila" ? `Vila — ${pedido.endereco}` : `Fazenda: ${pedido.fazenda} — ${pedido.endereco}`}</p>
+                    <p>&#128179; {pedido.pagamento === "pix" ? "Pix" : "Cartão"}</p>
+                    {pedido.taxaEntrega > 0 && <p>&#128757; Taxa: R$ {pedido.taxaEntrega?.toFixed(2).replace(".", ",")}</p>}
                   </div>
 
                   <div className="flex justify-between items-center border-t border-zinc-800 pt-2">
@@ -340,7 +342,7 @@ function AdminPainel({ onSair }) {
                       Total: R$ {pedido.total?.toFixed(2).replace(".", ",")}
                     </p>
                     {pedido.fidelidade_contada && (
-                      <span className="text-xs text-green-400">⭐ Fidelidade contada</span>
+                      <span className="text-xs text-green-400">&#11088; Fidelidade contada</span>
                     )}
                   </div>
 
@@ -352,7 +354,7 @@ function AdminPainel({ onSair }) {
                           onClick={() => handleStatus(pedido, s)}
                           className="flex-1 py-2 rounded-lg text-sm font-bold bg-zinc-800 hover:bg-zinc-700 text-white transition capitalize"
                         >
-                          → {s}
+                          &#8594; {s}
                         </button>
                       ))}
                     </div>
@@ -390,7 +392,7 @@ function AdminPainel({ onSair }) {
                 <div key={cat} className="bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 flex justify-between items-center">
                   <span className="font-semibold">{cat}</span>
                   <button onClick={() => handleDeletarCategoria(cat)} className="text-red-400 hover:text-red-300 text-sm transition">
-                    🗑 Apagar
+                    &#128465; Apagar
                   </button>
                 </div>
               ))}
@@ -516,8 +518,8 @@ function AdminPainel({ onSair }) {
                                 opcoes: prod.opcoes?.join(", ") || "",
                               })}
                                 className="text-zinc-400 hover:text-yellow-400 transition text-sm"
-                              >✏️</button>
-                              <button onClick={() => handleDeletarProduto(prod.id)} className="text-zinc-400 hover:text-red-400 transition text-sm">🗑</button>
+                              >&#9999;&#65039;</button>
+                              <button onClick={() => handleDeletarProduto(prod.id)} className="text-zinc-400 hover:text-red-400 transition text-sm">&#128465;</button>
                             </div>
                           </div>
                         )}
@@ -540,7 +542,7 @@ function AdminPainel({ onSair }) {
                 <div key={f.telefone} className="bg-zinc-900 border border-zinc-700 rounded-xl p-4 flex flex-col gap-3">
                   <div className="flex justify-between items-center">
                     <div>
-                      <p className="text-white font-bold">📱 {f.telefone}</p>
+                      <p className="text-white font-bold">&#128241; {f.telefone}</p>
                       <p className="text-zinc-400 text-sm">{f.pedidos} pedido(s) no total</p>
                     </div>
                     <div className="flex items-center gap-2">
@@ -549,7 +551,7 @@ function AdminPainel({ onSair }) {
                         onClick={() => { setEditandoFidelidade(f.telefone); setNovoContador(String(f.pedidos)); }}
                         className="text-zinc-400 hover:text-yellow-400 transition text-sm"
                       >
-                        ✏️
+                        &#9999;&#65039;
                       </button>
                     </div>
                   </div>
@@ -666,7 +668,7 @@ function AdminPainel({ onSair }) {
                           onClick={() => setEditandoAdicional({ id: a.id, nome: a.nome, preco: a.preco })}
                           className="text-zinc-400 hover:text-yellow-400 transition"
                         >
-                          ✏️
+                          &#9999;&#65039;
                         </button>
                         <button
                           onClick={async () => {
@@ -677,7 +679,7 @@ function AdminPainel({ onSair }) {
                           }}
                           className="text-zinc-400 hover:text-red-400 transition"
                         >
-                          🗑
+                          &#128465;
                         </button>
                       </div>
                     </div>
