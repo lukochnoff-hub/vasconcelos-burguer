@@ -1,15 +1,29 @@
 # 🍔 Vasconcelos Burguer
 
-Cardápio digital com sistema de pedidos via WhatsApp para a Vasconcelos Burguer.
+Cardápio digital completo com sistema de pedidos via WhatsApp para a Vasconcelos Burguer.
 
 ## Funcionalidades
 
-- Cardápio online com filtro por categorias
-- Carrinho de compras
-- Pedido via WhatsApp Business com resumo formatado
+### Cliente
+- Cardápio online com filtro por categorias e banner da loja
+- Modal de escolha de recheio para pastéis e bebidas
+- Modal de adicionais para hambúrgueres com controle de quantidade e soma automática no preço
+- Carrinho de compras com resumo detalhado
+- Confirmação do pedido antes de enviar
 - Entrega na vila, retirada ou entrega em fazendas com taxa automática
 - Programa de fidelidade — a cada 9 pedidos o 10° ganha um lanche grátis de até R$25
-- Painel admin protegido por senha para gerenciar produtos e categorias
+- Pedido enviado via WhatsApp Business com resumo completo, adicionais e contador de fidelidade
+- Aviso automático de loja fechada com horários de funcionamento
+
+### Painel Admin
+- Gerenciamento de produtos — adicionar, editar, remover e ocultar itens
+- Gerenciamento de categorias
+- Gerenciamento de adicionais com nome e preço
+- Controle de pedidos com status (pendente → em preparo → em entrega → finalizado)
+- Som de notificação ao receber pedido novo
+- Programa de fidelidade por cliente com edição manual
+- Faturamento por dia, semana e mês
+- Abrir/fechar loja manualmente
 
 ## Tecnologias
 
@@ -22,15 +36,27 @@ vasconcelos-burguer/
 
 ├── frontend/        # React + Vite + Tailwind
 
+│   └── src/
+
+│       ├── components/   # CardProduto, Carrinho, AdminPainel
+
+│       ├── context/      # CarrinhoContext
+
+│       ├── data/         # api.js, config.js
+
+│       └── pages/        # Cardapio, FinalizarPedido, Admin
+
 ├── backend/         # Flask API
 
-├── vercel.json      # Configuração de rotas para o Vercel
+│   └── routes/      # produtos, pedidos, categorias, fidelidade, adicionais, funcionamento
 
-└── render.yaml      # Configuração de deploy para o Render
+├── vercel.json
+
+└── render.yaml
 
 ## Acesso admin
 
-A proprietária acessa o painel de gerenciamento em `/admin` com senha exclusiva.
+A proprietária acessa o painel clicando 5x na logo, com senha exclusiva.
 
 ## Desenvolvido por
 
