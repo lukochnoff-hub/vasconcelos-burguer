@@ -15,6 +15,8 @@ export function CarrinhoProvider({ children }) {
             : i
         );
       }
+      return [...prev, { ...produto, quantidade: 1 }];
+    });
   }
 
   function removerItem(id) {
