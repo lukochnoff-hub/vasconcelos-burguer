@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   listarCategorias, listarProdutos, adicionarCategoria, deletarCategoria,
   adicionarProduto, atualizarProduto, deletarProduto,
   listarPedidos, atualizarStatusPedido, confirmarFidelidade,
-  consultarFuncionamento, abrirLoja, fecharLoja,
+  consultarFuncionamento, abrirLoja, fecharLoja, listarFidelidade, editarFidelidade,
 } from "../data/api";
 
 const STATUS_ORDEM = ["pendente", "em preparo", "em entrega", "finalizado"];
@@ -23,25 +23,67 @@ function AdminPainel({ onSair }) {
   const [carregando, setCarregando] = useState(true);
   const [filtroPeriodo, setFiltroPeriodo] = useState("dia");
   const [novaCategoria, setNovaCategoria] = useState("");
-  const [novoProduto, setNovoProduto] = useState({ nome: "", preco: "", descricao: "", categoria: "" });
+  const [novoProduto, setNovoProduto] = useState({ nome: "", preco: "", descricao: "", categoria: "", opcoes: "" });
   const [editando, setEditando] = useState(null);
+  const [fidelidade, setFidelidade] = useState([]);
+  const [editandoFidelidade, setEditandoFidelidade] = useState(null);
+  const [novoContador, setNovoContador] = useState("");
+  const [filtroCatProdutos, setFiltroCatProdutos] = useState("todas");
+
+  const pedidosIdsRef = useRef(new Set());
+
+  function tocarSom() {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(880, ctx.currentTime);
+      osc.frequency.setValueAtTime(660, ctx.currentTime + 0.15);
+      osc.frequency.setValueAtTime(880, ctx.currentTime + 0.3);
+      gain.gain.setValueAtTime(0.4, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.5);
+    } catch (e) {
+      console.log("Som não disponível:", e);
+    }
+  }
 
   useEffect(() => { carregarTudo(); }, []);
 
+  useEffect(() => {
+    const intervalo = setInterval(async () => {
+      const peds = await listarPedidos();
+      const novos = peds.filter(
+        (p) => p.status === "pendente" && !pedidosIdsRef.current.has(p.id)
+      );
+      if (novos.length > 0) {
+        tocarSom();
+        setPedidos(peds);
+        novos.forEach((p) => pedidosIdsRef.current.add(p.id));
+      }
+    }, 15000);
+    return () => clearInterval(intervalo);
+  }, []);
+
   async function carregarTudo() {
     setCarregando(true);
-    const [cats, prods, peds, func] = await Promise.all([
-      listarCategorias(), listarProdutos(), listarPedidos(), consultarFuncionamento()
+    const [cats, prods, peds, func, fidel] = await Promise.all([
+      listarCategorias(), listarProdutos(), listarPedidos(), consultarFuncionamento(), listarFidelidade()
     ]);
     setCategorias(cats);
     setProdutos(prods);
     setPedidos(peds);
     setFuncionamento(func);
+    setFidelidade(fidel);
     setNovoProduto((p) => ({ ...p, categoria: cats[0] || "" }));
+    peds.forEach((p) => pedidosIdsRef.current.add(p.id));
     setCarregando(false);
   }
 
-  // Funcionamento
   async function handleToggleLoja() {
     if (funcionamento.aberto) {
       await fecharLoja();
@@ -52,7 +94,6 @@ function AdminPainel({ onSair }) {
     }
   }
 
-  // Pedidos
   async function handleStatus(pedido, novoStatus) {
     await atualizarStatusPedido(pedido.id, novoStatus);
     if (novoStatus === "finalizado" && !pedido.fidelidade_contada) {
@@ -67,18 +108,14 @@ function AdminPainel({ onSair }) {
       if (!p.dia) return false;
       const [dia, mes, ano] = p.dia.split("/");
       const dataPedido = new Date(`${ano}-${mes}-${dia}`);
-      if (filtroPeriodo === "dia") {
-        return p.dia === agora.toLocaleDateString("pt-BR");
-      }
+      if (filtroPeriodo === "dia") return p.dia === agora.toLocaleDateString("pt-BR");
       if (filtroPeriodo === "semana") {
         const diff = (agora - dataPedido) / (1000 * 60 * 60 * 24);
         return diff <= 7;
       }
       if (filtroPeriodo === "mes") {
-        return (
-          dataPedido.getMonth() === agora.getMonth() &&
-          dataPedido.getFullYear() === agora.getFullYear()
-        );
+        return dataPedido.getMonth() === agora.getMonth() &&
+          dataPedido.getFullYear() === agora.getFullYear();
       }
       return true;
     });
@@ -90,7 +127,6 @@ function AdminPainel({ onSair }) {
       .reduce((acc, p) => acc + (p.total || 0), 0);
   }
 
-  // Categorias
   async function handleAdicionarCategoria() {
     if (!novaCategoria.trim()) return;
     await adicionarCategoria(novaCategoria.trim());
@@ -104,11 +140,13 @@ function AdminPainel({ onSair }) {
     carregarTudo();
   }
 
-  // Produtos
   async function handleAdicionarProduto() {
     if (!novoProduto.nome || !novoProduto.preco || !novoProduto.categoria) return;
-    await adicionarProduto({ ...novoProduto, preco: parseFloat(novoProduto.preco) });
-    setNovoProduto({ nome: "", preco: "", descricao: "", categoria: categorias[0] || "" });
+    const opcoes = novoProduto.opcoes
+      ? novoProduto.opcoes.split(",").map((o) => o.trim()).filter(Boolean)
+      : [];
+    await adicionarProduto({ ...novoProduto, preco: parseFloat(novoProduto.preco), opcoes });
+    setNovoProduto({ nome: "", preco: "", descricao: "", categoria: categorias[0] || "", opcoes: "" });
     carregarTudo();
   }
 
@@ -124,11 +162,15 @@ function AdminPainel({ onSair }) {
   }
 
   async function handleSalvarEdicao(produto) {
+    const opcoes = editando.opcoes
+      ? editando.opcoes.split(",").map((o) => o.trim()).filter(Boolean)
+      : [];
     await atualizarProduto(produto.id, {
       ...produto,
       nome: editando.nome,
       preco: parseFloat(editando.preco),
       descricao: editando.descricao,
+      opcoes,
     });
     setEditando(null);
     carregarTudo();
@@ -142,6 +184,13 @@ function AdminPainel({ onSair }) {
 
   const listaPedidos = pedidosFiltrados();
   const totalFaturado = faturamento(listaPedidos);
+  const totalPendentes = pedidos.filter((p) => p.status === "pendente").length;
+  const produtosFiltradosAdmin = filtroCatProdutos === "todas"
+    ? produtos
+    : produtos.filter((p) => p.categoria === filtroCatProdutos);
+  const categoriasFiltradas = filtroCatProdutos === "todas"
+    ? categorias
+    : categorias.filter((c) => c === filtroCatProdutos);
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -171,17 +220,23 @@ function AdminPainel({ onSair }) {
           { id: "pedidos", label: "📋 Pedidos" },
           { id: "produtos", label: "🍔 Produtos" },
           { id: "categorias", label: "📂 Categorias" },
+          { id: "fidelidade", label: "⭐ Fidelidade" },
         ].map((a) => (
           <button
             key={a.id}
             onClick={() => setAba(a.id)}
-            className={`flex-1 py-3 font-bold text-sm transition ${
+            className={`flex-1 py-3 font-bold text-sm transition relative ${
               aba === a.id
                 ? "text-yellow-400 border-b-2 border-yellow-400"
                 : "text-zinc-500 hover:text-white"
             }`}
           >
             {a.label}
+            {a.id === "pedidos" && totalPendentes > 0 && (
+              <span className="absolute top-1 right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                {totalPendentes}
+              </span>
+            )}
           </button>
         ))}
       </div>
@@ -191,7 +246,6 @@ function AdminPainel({ onSair }) {
         {/* ABA PEDIDOS */}
         {aba === "pedidos" && (
           <div className="flex flex-col gap-4">
-            {/* Filtro período */}
             <div className="flex gap-2">
               {["dia", "semana", "mes"].map((p) => (
                 <button
@@ -208,7 +262,6 @@ function AdminPainel({ onSair }) {
               ))}
             </div>
 
-            {/* Faturamento */}
             <div className="bg-zinc-900 border border-zinc-700 rounded-xl p-4 flex justify-between items-center">
               <div>
                 <p className="text-zinc-400 text-sm">Faturamento ({filtroPeriodo === "dia" ? "hoje" : filtroPeriodo === "semana" ? "essa semana" : "esse mês"})</p>
@@ -222,7 +275,6 @@ function AdminPainel({ onSair }) {
               </div>
             </div>
 
-            {/* Lista de pedidos */}
             {listaPedidos.length === 0 ? (
               <p className="text-zinc-400 text-center py-10">Nenhum pedido nesse período.</p>
             ) : (
@@ -239,17 +291,15 @@ function AdminPainel({ onSair }) {
                     </span>
                   </div>
 
-                  {/* Itens */}
                   <div className="border-t border-zinc-800 pt-2 flex flex-col gap-1">
                     {pedido.itens?.map((item, i) => (
                       <div key={i} className="flex justify-between text-sm text-zinc-300">
-                        <span>{item.quantidade}x {item.nome}</span>
+                        <span>{item.quantidade}x {item.nome}{item.opcao ? ` (${item.opcao})` : ""}</span>
                         <span>R$ {(item.preco * item.quantidade).toFixed(2).replace(".", ",")}</span>
                       </div>
                     ))}
                   </div>
 
-                  {/* Entrega e pagamento */}
                   <div className="text-sm text-zinc-400 border-t border-zinc-800 pt-2">
                     <p>📍 {pedido.tipoEntrega === "retirada" ? "Retirada" : pedido.tipoEntrega === "vila" ? `Vila — ${pedido.endereco}` : `Fazenda: ${pedido.fazenda} — ${pedido.endereco}`}</p>
                     <p>💳 {pedido.pagamento === "pix" ? "Pix" : "Cartão"}</p>
@@ -265,7 +315,6 @@ function AdminPainel({ onSair }) {
                     )}
                   </div>
 
-                  {/* Botões de status */}
                   {pedido.status !== "finalizado" && (
                     <div className="flex gap-2">
                       {STATUS_ORDEM.filter((s) => s !== pedido.status && STATUS_ORDEM.indexOf(s) > STATUS_ORDEM.indexOf(pedido.status)).map((s) => (
@@ -344,6 +393,11 @@ function AdminPainel({ onSair }) {
                 onChange={(e) => setNovoProduto({ ...novoProduto, preco: e.target.value })}
                 className="bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white placeholder-zinc-500 focus:outline-none focus:border-yellow-400"
               />
+              <input type="text" placeholder="Opções separadas por vírgula (ex: Carne, Frango, Queijo)"
+                value={novoProduto.opcoes}
+                onChange={(e) => setNovoProduto({ ...novoProduto, opcoes: e.target.value })}
+                className="bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white placeholder-zinc-500 focus:outline-none focus:border-yellow-400"
+              />
               <button onClick={handleAdicionarProduto}
                 className="bg-yellow-400 text-black font-bold py-2 rounded-lg hover:bg-yellow-300 transition"
               >
@@ -351,8 +405,35 @@ function AdminPainel({ onSair }) {
               </button>
             </div>
 
-            {categorias.map((cat) => {
-              const prods = produtos.filter((p) => p.categoria === cat);
+            {/* Filtro de categoria */}
+            <div className="flex gap-2 flex-wrap">
+              <button
+                onClick={() => setFiltroCatProdutos("todas")}
+                className={`px-4 py-2 rounded-full font-bold text-sm transition ${
+                  filtroCatProdutos === "todas"
+                    ? "bg-yellow-400 text-black"
+                    : "bg-zinc-800 text-white hover:bg-zinc-700"
+                }`}
+              >
+                Todas
+              </button>
+              {categorias.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setFiltroCatProdutos(cat)}
+                  className={`px-4 py-2 rounded-full font-bold text-sm transition ${
+                    filtroCatProdutos === cat
+                      ? "bg-yellow-400 text-black"
+                      : "bg-zinc-800 text-white hover:bg-zinc-700"
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+
+            {categoriasFiltradas.map((cat) => {
+              const prods = produtosFiltradosAdmin.filter((p) => p.categoria === cat);
               if (prods.length === 0) return null;
               return (
                 <div key={cat}>
@@ -371,6 +452,12 @@ function AdminPainel({ onSair }) {
                             <input type="number" value={editando.preco} onChange={(e) => setEditando({ ...editando, preco: e.target.value })}
                               className="bg-zinc-800 border border-zinc-600 rounded-lg px-3 py-2 text-white focus:outline-none"
                             />
+                            <input type="text"
+                              value={editando.opcoes}
+                              onChange={(e) => setEditando({ ...editando, opcoes: e.target.value })}
+                              placeholder="Opções separadas por vírgula (ex: Carne, Frango)"
+                              className="bg-zinc-800 border border-zinc-600 rounded-lg px-3 py-2 text-white focus:outline-none placeholder-zinc-500"
+                            />
                             <div className="flex gap-2">
                               <button onClick={() => handleSalvarEdicao(prod)} className="flex-1 bg-yellow-400 text-black font-bold py-2 rounded-lg hover:bg-yellow-300 transition">Salvar</button>
                               <button onClick={() => setEditando(null)} className="flex-1 bg-zinc-700 text-white py-2 rounded-lg hover:bg-zinc-600 transition">Cancelar</button>
@@ -381,6 +468,9 @@ function AdminPainel({ onSair }) {
                             <div>
                               <p className="font-semibold text-white">{prod.nome}</p>
                               {prod.descricao && <p className="text-zinc-400 text-sm">{prod.descricao}</p>}
+                              {prod.opcoes?.length > 0 && (
+                                <p className="text-zinc-500 text-xs mt-1">Opções: {prod.opcoes.join(", ")}</p>
+                              )}
                               <p className="text-yellow-400 font-bold">R$ {prod.preco.toFixed(2).replace(".", ",")}</p>
                             </div>
                             <div className="flex gap-2 items-center">
@@ -389,7 +479,13 @@ function AdminPainel({ onSair }) {
                               >
                                 {prod.disponivel ? "✓ Disponível" : "✗ Indisponível"}
                               </button>
-                              <button onClick={() => setEditando({ id: prod.id, nome: prod.nome, preco: prod.preco, descricao: prod.descricao || "" })}
+                              <button onClick={() => setEditando({
+                                id: prod.id,
+                                nome: prod.nome,
+                                preco: prod.preco,
+                                descricao: prod.descricao || "",
+                                opcoes: prod.opcoes?.join(", ") || "",
+                              })}
                                 className="text-zinc-400 hover:text-yellow-400 transition text-sm"
                               >✏️</button>
                               <button onClick={() => handleDeletarProduto(prod.id)} className="text-zinc-400 hover:text-red-400 transition text-sm">🗑</button>
@@ -404,6 +500,63 @@ function AdminPainel({ onSair }) {
             })}
           </div>
         )}
+
+        {/* ABA FIDELIDADE */}
+        {aba === "fidelidade" && (
+          <div className="flex flex-col gap-3">
+            {fidelidade.length === 0 ? (
+              <p className="text-zinc-400 text-center py-10">Nenhum cliente com pedidos ainda.</p>
+            ) : (
+              fidelidade.map((f) => (
+                <div key={f.telefone} className="bg-zinc-900 border border-zinc-700 rounded-xl p-4 flex flex-col gap-3">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="text-white font-bold">📱 {f.telefone}</p>
+                      <p className="text-zinc-400 text-sm">{f.pedidos} pedido(s) no total</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-yellow-400 font-bold text-lg">{f.pedidos % 10}/9</span>
+                      <button
+                        onClick={() => { setEditandoFidelidade(f.telefone); setNovoContador(String(f.pedidos)); }}
+                        className="text-zinc-400 hover:text-yellow-400 transition text-sm"
+                      >
+                        ✏️
+                      </button>
+                    </div>
+                  </div>
+                  {editandoFidelidade === f.telefone && (
+                    <div className="flex gap-2 items-center border-t border-zinc-800 pt-3">
+                      <input
+                        type="number"
+                        value={novoContador}
+                        onChange={(e) => setNovoContador(e.target.value)}
+                        className="flex-1 bg-zinc-800 border border-yellow-400 rounded-lg px-3 py-2 text-white focus:outline-none"
+                        placeholder="Total de pedidos"
+                      />
+                      <button
+                        onClick={async () => {
+                          await editarFidelidade(f.telefone, parseInt(novoContador));
+                          setEditandoFidelidade(null);
+                          carregarTudo();
+                        }}
+                        className="bg-yellow-400 text-black font-bold px-4 py-2 rounded-lg hover:bg-yellow-300 transition"
+                      >
+                        Salvar
+                      </button>
+                      <button
+                        onClick={() => setEditandoFidelidade(null)}
+                        className="bg-zinc-700 text-white px-4 py-2 rounded-lg hover:bg-zinc-600 transition"
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+        )}
+
       </div>
     </div>
   );

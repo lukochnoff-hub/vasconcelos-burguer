@@ -110,3 +110,46 @@ export async function fecharLoja() {
   const res = await fetch(`${BASE_URL}/funcionamento/fechar`, { method: "POST" });
   return res.json();
 }
+
+export async function listarFidelidade() {
+  const res = await fetch(`${BASE_URL}/fidelidade`);
+  return res.json();
+}
+
+export async function editarFidelidade(telefone, pedidos) {
+  const res = await fetch(`${BASE_URL}/fidelidade/${telefone}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ pedidos }),
+  });
+  return res.json();
+}
+
+// Adicionais
+export async function listarAdicionais() {
+  const res = await fetch(`${BASE_URL}/adicionais`);
+  return res.json();
+}
+
+export async function adicionarAdicional(adicional) {
+  const res = await fetch(`${BASE_URL}/adicionais`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(adicional),
+  });
+  return res.json();
+}
+
+export async function atualizarAdicional(id, adicional) {
+  const res = await fetch(`${BASE_URL}/adicionais/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(adicional),
+  });
+  return res.json();
+}
+
+export async function deletarAdicional(id) {
+  const res = await fetch(`${BASE_URL}/adicionais/${id}`, { method: "DELETE" });
+  return res.json();
+}

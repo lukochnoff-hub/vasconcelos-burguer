@@ -7,14 +7,14 @@ export function CarrinhoProvider({ children }) {
 
   function adicionarItem(produto) {
     setItens((prev) => {
-      const existe = prev.find((i) => i.id === produto.id);
+      const existe = prev.find((i) => i.id === produto.id && i.opcao === produto.opcao);
       if (existe) {
         return prev.map((i) =>
-          i.id === produto.id ? { ...i, quantidade: i.quantidade + 1 } : i
+          i.id === produto.id && i.opcao === produto.opcao
+            ? { ...i, quantidade: i.quantidade + 1 }
+            : i
         );
       }
-      return [...prev, { ...produto, quantidade: 1 }];
-    });
   }
 
   function removerItem(id) {
