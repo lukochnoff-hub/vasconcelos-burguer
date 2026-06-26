@@ -220,7 +220,7 @@ function AdminPainel({ onSair }) {
       </div>
 
       {/* Abas */}
-      <div className="flex border-b border-zinc-800">
+      <div className="flex border-b border-zinc-800 overflow-x-auto">
         {[
           { id: "pedidos", label: "Pedidos" },
           { id: "produtos", label: "Produtos" },
@@ -231,7 +231,7 @@ function AdminPainel({ onSair }) {
           <button
             key={a.id}
             onClick={() => setAba(a.id)}
-            className={`flex-1 py-3 font-bold text-sm transition relative ${
+            className={`flex-none px-4 py-3 font-bold text-sm transition relative whitespace-nowrap ${
               aba === a.id
                 ? "text-yellow-400 border-b-2 border-yellow-400"
                 : "text-zinc-500 hover:text-white"
