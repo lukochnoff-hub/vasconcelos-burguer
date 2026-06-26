@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { listarProdutos, listarCategorias, consultarFuncionamento } from "../data/api";
 import CardProduto from "../components/CarProduto";
+import logo from "../assets/logo_lanche.png";
 
 const HORARIOS = {
   0: { abre: 20, fecha: 23 }, // Domingo
@@ -81,6 +82,28 @@ function Cardapio() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 pb-28">
+  
+      {/* Banner */}
+      <div className="relative rounded-2xl overflow-hidden mb-6 bg-zinc-900 border border-zinc-700">
+        <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent z-10" />
+        <div className="relative z-20 flex items-center gap-4 px-5 py-5">
+          <img
+            src={logo}
+            alt="Vasconcelos Burguer"
+            className="w-16 h-16 rounded-full object-cover border-2 border-yellow-400 shrink-0"
+          />
+          <div>
+            <h2 className="text-yellow-400 font-bold text-xl leading-tight">
+              Vasconcelos Burguer
+            </h2>
+            <p className="text-zinc-400 text-sm mt-0.5">Artesanal de verdade 🍔</p>
+            <span className="inline-block mt-1.5 bg-green-500 text-black text-xs font-bold px-2 py-0.5 rounded-full">
+              🟢 Aberto agora
+            </span>
+          </div>
+        </div>
+      </div>
+  
       <div className="flex gap-3 mb-6 overflow-x-auto pb-1">
         {categorias.map((cat) => (
           <button
