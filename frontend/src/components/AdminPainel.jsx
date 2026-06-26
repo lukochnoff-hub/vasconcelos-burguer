@@ -23,6 +23,7 @@ function AdminPainel({ onSair }) {
   const [funcionamento, setFuncionamento] = useState({ aberto: false });
   const [carregando, setCarregando] = useState(true);
   const [filtroPeriodo, setFiltroPeriodo] = useState("dia");
+  const [filtroMesSelecionado, setFiltroMesSelecionado] = useState("");
   const [novaCategoria, setNovaCategoria] = useState("");
   const [novoProduto, setNovoProduto] = useState({ nome: "", preco: "", descricao: "", categoria: "", opcoes: "" });
   const [editando, setEditando] = useState(null);
@@ -121,6 +122,9 @@ function AdminPainel({ onSair }) {
       if (filtroPeriodo === "mes") {
         return dataPedido.getMonth() === agora.getMonth() &&
           dataPedido.getFullYear() === agora.getFullYear();
+      }
+      if (filtroPeriodo === "mesSelecionado" && filtroMesSelecionado) {
+        return p.mes === filtroMesSelecionado;
       }
       return true;
     });
@@ -250,23 +254,42 @@ function AdminPainel({ onSair }) {
       <div className="max-w-2xl mx-auto px-4 py-6">
 
         {/* ABA PEDIDOS */}
-        {aba === "pedidos" && (
-          <div className="flex flex-col gap-4">
-            <div className="flex gap-2">
-              {["dia", "semana", "mes"].map((p) => (
-                <button
-                  key={p}
-                  onClick={() => setFiltroPeriodo(p)}
-                  className={`flex-1 py-2 rounded-xl font-bold text-sm transition ${
-                    filtroPeriodo === p
-                      ? "bg-yellow-400 text-black"
-                      : "bg-zinc-800 text-white hover:bg-zinc-700"
-                  }`}
-                >
-                  {p === "dia" ? "Hoje" : p === "semana" ? "Semana" : "Mês"}
-                </button>
-              ))}
-            </div>
+        <div className="flex gap-2">
+          {["dia", "semana", "mes"].map((p) => (
+            <button
+              key={p}
+              onClick={() => setFiltroPeriodo(p)}
+              className={`flex-1 py-2 rounded-xl font-bold text-sm transition ${
+                filtroPeriodo === p
+                  ? "bg-yellow-400 text-black"
+                  : "bg-zinc-800 text-white hover:bg-zinc-700"
+              }`}
+            >
+              {p === "dia" ? "Hoje" : p === "semana" ? "Semana" : "Mês"}
+            </button>
+          ))}
+          <button
+            onClick={() => setFiltroPeriodo("mesSelecionado")}
+            className={`flex-1 py-2 rounded-xl font-bold text-sm transition ${
+              filtroPeriodo === "mesSelecionado"
+                ? "bg-yellow-400 text-black"
+                : "bg-zinc-800 text-white hover:bg-zinc-700"
+            }`}
+          >
+            📅
+          </button>
+        </div>
+
+        {filtroPeriodo === "mesSelecionado" && (
+          <input
+            type="month"
+            onChange={(e) => {
+              const [ano, mes] = e.target.value.split("-");
+              setFiltroMesSelecionado(`${mes}/${ano}`);
+            }}
+            className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-yellow-400"
+          />
+        )}
 
             <div className="bg-zinc-900 border border-zinc-700 rounded-xl p-4 flex justify-between items-center">
               <div>
