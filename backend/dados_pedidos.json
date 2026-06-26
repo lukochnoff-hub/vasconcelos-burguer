@@ -30,6 +30,8 @@
     "total": 36,
     "id": 1,
     "data": "25/06/2026 16:03",
-    "status": "pendente"
+    "dia": "25/06/2026",
+    "status": "pendente",
+    "fidelidade_contada": false
   }
 ]
