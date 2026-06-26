@@ -4,6 +4,7 @@ import {
   adicionarProduto, atualizarProduto, deletarProduto,
   listarPedidos, atualizarStatusPedido, confirmarFidelidade,
   consultarFuncionamento, abrirLoja, fecharLoja, listarFidelidade, editarFidelidade,
+  listarAdicionais, adicionarAdicional, atualizarAdicional, deletarAdicional,
 } from "../data/api";
 
 const STATUS_ORDEM = ["pendente", "em preparo", "em entrega", "finalizado"];
@@ -29,6 +30,9 @@ function AdminPainel({ onSair }) {
   const [editandoFidelidade, setEditandoFidelidade] = useState(null);
   const [novoContador, setNovoContador] = useState("");
   const [filtroCatProdutos, setFiltroCatProdutos] = useState("todas");
+  const [adicionais, setAdicionais] = useState([]);
+  const [novoAdicional, setNovoAdicional] = useState({ nome: "", preco: "" });
+  const [editandoAdicional, setEditandoAdicional] = useState(null);
 
   const pedidosIdsRef = useRef(new Set());
 
@@ -71,14 +75,15 @@ function AdminPainel({ onSair }) {
 
   async function carregarTudo() {
     setCarregando(true);
-    const [cats, prods, peds, func, fidel] = await Promise.all([
-      listarCategorias(), listarProdutos(), listarPedidos(), consultarFuncionamento(), listarFidelidade()
+    const [cats, prods, peds, func, fidel, adics] = await Promise.all([
+      listarCategorias(), listarProdutos(), listarPedidos(), consultarFuncionamento(), listarFidelidade(), listarAdicionais()
     ]);
     setCategorias(cats);
     setProdutos(prods);
     setPedidos(peds);
     setFuncionamento(func);
     setFidelidade(fidel);
+    setAdicionais(adics);
     setNovoProduto((p) => ({ ...p, categoria: cats[0] || "" }));
     peds.forEach((p) => pedidosIdsRef.current.add(p.id));
     setCarregando(false);
@@ -221,6 +226,7 @@ function AdminPainel({ onSair }) {
           { id: "produtos", label: "🍔 Produtos" },
           { id: "categorias", label: "📂 Categorias" },
           { id: "fidelidade", label: "⭐ Fidelidade" },
+          { id: "adicionais", label: "➕ Adicionais" },
         ].map((a) => (
           <button
             key={a.id}
@@ -554,6 +560,108 @@ function AdminPainel({ onSair }) {
                 </div>
               ))
             )}
+          </div>
+        )}
+
+        {/* ABA ADICIONAIS */}
+        {aba === "adicionais" && (
+          <div className="flex flex-col gap-6">
+            <div className="bg-zinc-900 border border-zinc-700 rounded-xl p-4 flex flex-col gap-3">
+              <h2 className="text-yellow-400 font-bold">Novo Adicional</h2>
+              <input
+                type="text"
+                placeholder="Nome (ex: Bacon extra)"
+                value={novoAdicional.nome}
+                onChange={(e) => setNovoAdicional({ ...novoAdicional, nome: e.target.value })}
+                className="bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white placeholder-zinc-500 focus:outline-none focus:border-yellow-400"
+              />
+              <input
+                type="number"
+                placeholder="Preço (ex: 2)"
+                value={novoAdicional.preco}
+                onChange={(e) => setNovoAdicional({ ...novoAdicional, preco: e.target.value })}
+                className="bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white placeholder-zinc-500 focus:outline-none focus:border-yellow-400"
+              />
+              <button
+                onClick={async () => {
+                  if (!novoAdicional.nome || !novoAdicional.preco) return;
+                  await adicionarAdicional({ nome: novoAdicional.nome, preco: parseFloat(novoAdicional.preco) });
+                  setNovoAdicional({ nome: "", preco: "" });
+                  const adics = await listarAdicionais();
+                  setAdicionais(adics);
+                }}
+                className="bg-yellow-400 text-black font-bold py-2 rounded-lg hover:bg-yellow-300 transition"
+              >
+                + Adicionar
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              {adicionais.map((a) => (
+                <div key={a.id} className="bg-zinc-900 border border-zinc-700 rounded-xl p-4 flex flex-col gap-2">
+                  {editandoAdicional?.id === a.id ? (
+                    <div className="flex flex-col gap-2">
+                      <input
+                        value={editandoAdicional.nome}
+                        onChange={(e) => setEditandoAdicional({ ...editandoAdicional, nome: e.target.value })}
+                        className="bg-zinc-800 border border-yellow-400 rounded-lg px-3 py-2 text-white focus:outline-none"
+                      />
+                      <input
+                        type="number"
+                        value={editandoAdicional.preco}
+                        onChange={(e) => setEditandoAdicional({ ...editandoAdicional, preco: e.target.value })}
+                        className="bg-zinc-800 border border-zinc-600 rounded-lg px-3 py-2 text-white focus:outline-none"
+                      />
+                      <div className="flex gap-2">
+                        <button
+                          onClick={async () => {
+                            await atualizarAdicional(a.id, { nome: editandoAdicional.nome, preco: parseFloat(editandoAdicional.preco) });
+                            setEditandoAdicional(null);
+                            const adics = await listarAdicionais();
+                            setAdicionais(adics);
+                          }}
+                          className="flex-1 bg-yellow-400 text-black font-bold py-2 rounded-lg hover:bg-yellow-300 transition"
+                        >
+                          Salvar
+                        </button>
+                        <button
+                          onClick={() => setEditandoAdicional(null)}
+                          className="flex-1 bg-zinc-700 text-white py-2 rounded-lg hover:bg-zinc-600 transition"
+                        >
+                          Cancelar
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-semibold text-white">{a.nome}</p>
+                        <p className="text-yellow-400 font-bold">R$ {a.preco.toFixed(2).replace(".", ",")}</p>
+                      </div>
+                      <div className="flex gap-3 items-center">
+                        <button
+                          onClick={() => setEditandoAdicional({ id: a.id, nome: a.nome, preco: a.preco })}
+                          className="text-zinc-400 hover:text-yellow-400 transition"
+                        >
+                          ✏️
+                        </button>
+                        <button
+                          onClick={async () => {
+                            if (!window.confirm("Apagar este adicional?")) return;
+                            await deletarAdicional(a.id);
+                            const adics = await listarAdicionais();
+                            setAdicionais(adics);
+                          }}
+                          className="text-zinc-400 hover:text-red-400 transition"
+                        >
+                          🗑
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
