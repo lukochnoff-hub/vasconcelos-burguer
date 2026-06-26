@@ -278,7 +278,7 @@ function AdminPainel({ onSair }) {
                     : "bg-zinc-800 text-white hover:bg-zinc-700"
                 }`}
               >
-                &#128197;
+                Historico
               </button>
             </div>
 
