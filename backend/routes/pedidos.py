@@ -20,7 +20,6 @@ def registrar():
     pedido["status"] = "pendente"
     pedido["fidelidade_contada"] = False
 
-    # renomear campos pra bater com o banco
     pedido["tipo_entrega"] = pedido.pop("tipoEntrega", "")
     pedido["taxa_entrega"] = pedido.pop("taxaEntrega", 0)
 
@@ -56,9 +55,7 @@ def confirmar_fidelidade(id):
     supabase.table("pedidos").update({"fidelidade_contada": True}).eq("id", id).execute()
     return jsonify({"ok": True, "pedidos": total})
 
-    @pedidos_bp.route("/pedidos/<int:id>", methods=["DELETE"])
-    def deletar(id):
-        dados = carregar_dados()
-        dados = [p for p in dados if p["id"] != id]
-        salvar_dados(dados)
-        return jsonify({"ok": True})
+@pedidos_bp.route("/pedidos/<int:id>", methods=["DELETE"])
+def deletar(id):
+    res = supabase.table("pedidos").delete().eq("id", id).execute()
+    return jsonify({"ok": True})
