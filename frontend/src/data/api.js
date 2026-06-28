@@ -153,3 +153,8 @@ export async function deletarAdicional(id) {
   const res = await fetch(`${BASE_URL}/adicionais/${id}`, { method: "DELETE" });
   return res.json();
 }
+
+export async function deletarPedido(id) {
+  const res = await fetch(`${BASE_URL}/pedidos/${id}`, { method: "DELETE" });
+  return res.json();
+}

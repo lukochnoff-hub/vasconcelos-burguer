@@ -55,3 +55,10 @@ def confirmar_fidelidade(id):
 
     supabase.table("pedidos").update({"fidelidade_contada": True}).eq("id", id).execute()
     return jsonify({"ok": True, "pedidos": total})
+
+    @pedidos_bp.route("/pedidos/<int:id>", methods=["DELETE"])
+    def deletar(id):
+        dados = carregar_dados()
+        dados = [p for p in dados if p["id"] != id]
+        salvar_dados(dados)
+        return jsonify({"ok": True})

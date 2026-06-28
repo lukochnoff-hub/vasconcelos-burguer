@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import {
   listarCategorias, listarProdutos, adicionarCategoria, deletarCategoria,
   adicionarProduto, atualizarProduto, deletarProduto,
-  listarPedidos, atualizarStatusPedido, confirmarFidelidade,
+  listarPedidos, atualizarStatusPedido, confirmarFidelidade, deletarPedido,
   consultarFuncionamento, abrirLoja, fecharLoja, listarFidelidade, editarFidelidade,
   listarAdicionais, adicionarAdicional, atualizarAdicional, deletarAdicional,
 } from "../data/api";
@@ -70,7 +70,7 @@ function AdminPainel({ onSair }) {
         setPedidos(peds);
         novos.forEach((p) => pedidosIdsRef.current.add(p.id));
       }
-    }, 15000);
+    }, 5000);
     return () => clearInterval(intervalo);
   }, []);
 
@@ -105,6 +105,12 @@ function AdminPainel({ onSair }) {
     if (novoStatus === "finalizado" && !pedido.fidelidade_contada) {
       await confirmarFidelidade(pedido.id);
     }
+    carregarTudo();
+  }
+
+  async function handleDeletarPedido(id) {
+    if (!window.confirm("Tem certeza que deseja excluir este pedido? Esta ação não pode ser desfeita.")) return;
+    await deletarPedido(id);
     carregarTudo();
   }
 
@@ -341,9 +347,18 @@ function AdminPainel({ onSair }) {
                     <p className="text-yellow-400 font-bold">
                       Total: R$ {pedido.total?.toFixed(2).replace(".", ",")}
                     </p>
-                    {pedido.fidelidade_contada && (
-                      <span className="text-xs text-green-400">&#11088; Fidelidade contada</span>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {pedido.fidelidade_contada && (
+                        <span className="text-xs text-green-400">&#11088; Fidelidade contada</span>
+                      )}
+                      <button
+                        onClick={() => handleDeletarPedido(pedido.id)}
+                        className="text-zinc-500 hover:text-red-400 transition text-sm"
+                        title="Excluir pedido"
+                      >
+                        &#128465;
+                      </button>
+                    </div>
                   </div>
 
                   {pedido.status !== "finalizado" && (
